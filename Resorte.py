@@ -4,8 +4,9 @@ import sys
 
 clock = pygame.time.Clock()
 
+
 pygame.init() 
-screenSize = 640
+screenSize = 680
 win = pygame.display.set_mode((screenSize, screenSize)) #display 640x640
 pygame.display.set_caption("Resorte") #Nombre de la ventana 
 timeInSimulation = 0 #segundos
@@ -17,6 +18,9 @@ x1 = x1_eq
 y1 = y1_eq
 x2 = x2_eq
 y2 = y2_eq
+
+E1 = 0
+E2 = 0
  
 Radius = 20 #Radio de las partículas
 w_1 = 1 
@@ -45,8 +49,8 @@ while True:
             k4 = (AmplitudeY1 - y1_eq)*1/2 - (AmplitudeY2 - y2_eq)*1/2
             start = True
 
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_r: #Si se pulsa la R se reinicia con las CI dadas.
-            x1, y1 = AmplitudeX1, AmplitudeY1 
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_r: #Si se pulsa la R se reinicia con las ultimas
+            x1, y1 = AmplitudeX1, AmplitudeY1                        #CI simuladas.
             x2, y2 = AmplitudeX2, AmplitudeY2
             start = False 
             timeInSimulation = 0
@@ -64,8 +68,13 @@ while True:
         x2 = k1*np.cos(w_1*timeInSimulation) - k2*np.cos(w_2*timeInSimulation) + x2_eq        
         y1 = k3*np.cos(w_1*timeInSimulation) + k4*np.cos(w_2*timeInSimulation) + y1_eq
         y2 = k3*np.cos(w_1*timeInSimulation) - k4*np.cos(w_2*timeInSimulation) + y2_eq
-        timeInSimulation += 0.01
-    
+        
+        #Energía
+        E1 = 1/2*1/20*((-k1*w_1*np.sin(w_1*timeInSimulation) - k2*w_2*np.sin(w_2*timeInSimulation))**2 + (-k3*w_1*np.sin(w_1*timeInSimulation) - k4*w_2*np.sin(w_2*timeInSimulation))**2)
+        E2 = 1/2*1/20*((-k1*w_1*np.sin(w_1*timeInSimulation) + k2*w_2*np.sin(w_2*timeInSimulation))**2 + (-k3*w_1*np.sin(w_1*timeInSimulation) + k4*w_2*np.sin(w_2*timeInSimulation))**2)
+        
+        timeInSimulation += 0.01 
+
 
 
 
@@ -80,11 +89,14 @@ while True:
 
 
     win.fill((0,0,0)) #Le da el fondo negro
-    pygame.draw.circle(win, (255, 0, 0), (x1, y1), Radius, 0) #Dibuja los círculos
+    pygame.draw.circle(win, (255, 233, 0), (x1, y1), Radius, 0) #Dibuja los círculos
     pygame.draw.circle(win, (255, 0, 0), (x2, y2), Radius, 0)
+    #Dibuja un rectangulo que representa la energía
+    pygame.draw.rect(win, (255, 233, 0), (y1_eq -250, y1_eq + 250, E1, 30))
+    pygame.draw.rect(win, (255, 0, 0), (y1_eq -250, y1_eq + 290, E2, 30))
     #Dibuja el rectangulo dándole los vetices.
     pygame.draw.polygon(win, (0, 255, 0), [(y1_eq -250, y1_eq - 150), (y1_eq - 250, y1_eq + 150), (y1_eq + 250, y1_eq + 150), (y1_eq + 250, y1_eq - 150)], 10) #draws the square
-    #Dibuja los "resortes" dándole las coordenadas de los extremos
+    #Dibuja los "resortes" dándole las coordenadas de los extremos, se podría meter en un for loop pero bueno quedó asi.
     pygame.draw.line(win, (0, 160, 160), (y1_eq - 250, y1_eq), (x1 - Radius,y1), width = 3)
     pygame.draw.line(win, (0, 160, 160), (x1_eq, y1_eq + 150), (x1,y1 + Radius), width = 3)
     pygame.draw.line(win, (0, 160, 160), (x1_eq, y1_eq - 150), (x1,y1 - Radius), width = 3)
